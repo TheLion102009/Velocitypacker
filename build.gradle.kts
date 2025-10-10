@@ -29,6 +29,24 @@ dependencies {
 }
 
 tasks {
+    shadowJar {
+        archiveClassifier.set("")
+        
+        // Relocate dependencies to avoid conflicts
+        relocate("kotlin", "de.thelion.velocitypacker.libs.kotlin")
+        relocate("org.yaml.snakeyaml", "de.thelion.velocitypacker.libs.snakeyaml")
+        
+        // Don't relocate SQLite JDBC driver - it needs to be found by DriverManager
+        // relocate("org.sqlite", "de.thelion.velocitypacker.libs.sqlite")
+        
+        // Don't minimize - it removes SQLite JDBC driver classes
+        // minimize()
+    }
+    
+    build {
+        dependsOn(shadowJar)
+    }
+    
     runVelocity {
         // Configure the Velocity version for our task.
         // This is the only required configuration besides applying the plugin.

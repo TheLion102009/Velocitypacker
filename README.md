@@ -96,10 +96,12 @@ Das Plugin verwendet SQLite zur Speicherung:
 ## Build
 
 ```bash
-./gradlew build
+./gradlew clean build
 ```
 
 Die kompilierte JAR findest du in `build/libs/Velocitypacker-0.1.jar`
+
+**Wichtig**: Das Plugin verwendet das Shadow-Plugin, um alle Dependencies (Kotlin, SQLite, SnakeYAML) in die JAR zu bundlen. Die finale JAR ist ca. 15 MB groß und enthält alles was benötigt wird.
 
 ## Lizenz
 

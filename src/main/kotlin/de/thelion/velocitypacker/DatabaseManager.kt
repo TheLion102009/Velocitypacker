@@ -9,6 +9,13 @@ class DatabaseManager(dataFolder: File) {
     private val connection: Connection
 
     init {
+        // Explicitly load the SQLite JDBC driver
+        try {
+            Class.forName("org.sqlite.JDBC")
+        } catch (e: ClassNotFoundException) {
+            throw RuntimeException("SQLite JDBC driver not found", e)
+        }
+        
         dataFolder.mkdirs()
         val dbFile = File(dataFolder, "resourcepack.db")
         connection = DriverManager.getConnection("jdbc:sqlite:${dbFile.absolutePath}")
