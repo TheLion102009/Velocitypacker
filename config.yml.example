@@ -1,0 +1,30 @@
+# Velocitypacker Configuration
+# Diese Datei wird automatisch als config.yml im plugins/velocitypacker Ordner erstellt
+
+# URL zum Resourcepack (ERFORDERLICH)
+# Muss eine direkte Download-URL zu einer .zip Datei sein
+resourcePackUrl: https://example.com/resourcepack.zip
+
+# SHA-1 Hash des Resourcepacks (OPTIONAL aber empfohlen)
+# Format: 40 Zeichen Hexadezimal (z.B. a1b2c3d4e5f6...)
+# Leer lassen wenn kein Hash verwendet werden soll
+# Um den Hash zu generieren: sha1sum resourcepack.zip (Linux/Mac) oder certutil -hashfile resourcepack.zip SHA1 (Windows)
+resourcePackSha1: ''
+
+# Nachricht die dem Spieler angezeigt wird
+# Unterstützt Minecraft Farbcodes mit §
+resourcePackPrompt: §aBitte akzeptiere das Resourcepack um zu spielen!
+
+# Spieler kicken wenn das Resourcepack abgelehnt wird
+kickOnDecline: true
+
+# Spieler kicken wenn der Download fehlschlägt
+kickOnFailedDownload: true
+
+# Kick-Nachricht (unterstützt Farbcodes mit §)
+kickMessage: §cDu musst das Resourcepack akzeptieren um zu spielen!
+
+# Nur beim ersten Join auf den Proxy senden (nicht bei jedem Backend-Server-Wechsel)
+# true = Pack wird nur einmal gesendet und in der Datenbank gespeichert
+# false = Pack wird bei jedem Join gesendet
+onlyOnFirstJoin: true
