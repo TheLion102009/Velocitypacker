@@ -1,30 +1,31 @@
 # Velocitypacker Configuration
-# Diese Datei wird automatisch als config.yml im plugins/velocitypacker Ordner erstellt
+# This file will be automatically created as config.yml in the plugins/velocitypacker folder
 
-# URL zum Resourcepack (ERFORDERLICH)
-# Muss eine direkte Download-URL zu einer .zip Datei sein
+# Resource pack URL (REQUIRED)
+# Must be a direct download URL to a .zip file
 resourcePackUrl: https://example.com/resourcepack.zip
 
-# SHA-1 Hash des Resourcepacks (OPTIONAL aber empfohlen)
-# Format: 40 Zeichen Hexadezimal (z.B. a1b2c3d4e5f6...)
-# Leer lassen wenn kein Hash verwendet werden soll
-# Um den Hash zu generieren: sha1sum resourcepack.zip (Linux/Mac) oder certutil -hashfile resourcepack.zip SHA1 (Windows)
+# SHA-1 hash of the resource pack (OPTIONAL but recommended)
+# Format: 40 hexadecimal characters (e.g. a1b2c3d4e5f6...)
+# Leave empty if you don't want to use a hash
+# To generate the hash: sha1sum resourcepack.zip (Linux/Mac) or certutil -hashfile resourcepack.zip SHA1 (Windows)
 resourcePackSha1: ''
 
-# Nachricht die dem Spieler angezeigt wird
-# Unterstützt Minecraft Farbcodes mit §
-resourcePackPrompt: §aBitte akzeptiere das Resourcepack um zu spielen!
+# Message shown to the player
+# Supports Minecraft color codes with §
+resourcePackPrompt: §aPlease accept the resource pack to play!
 
-# Spieler kicken wenn das Resourcepack abgelehnt wird
+# Kick player if the resource pack is declined
 kickOnDecline: true
 
-# Spieler kicken wenn der Download fehlschlägt
+# Kick player if the download fails
 kickOnFailedDownload: true
 
-# Kick-Nachricht (unterstützt Farbcodes mit §)
-kickMessage: §cDu musst das Resourcepack akzeptieren um zu spielen!
+# Kick message (supports color codes with §)
+kickMessage: §cYou must accept the resource pack to play!
 
-# Nur beim ersten Join auf den Proxy senden (nicht bei jedem Backend-Server-Wechsel)
-# true = Pack wird nur einmal gesendet und in der Datenbank gespeichert
-# false = Pack wird bei jedem Join gesendet
-onlyOnFirstJoin: true
+# IMPORTANT: 
+# - The pack is sent on EVERY proxy join
+# - When switching between backend servers it will NOT be sent again (stored in session)
+# - The player is held in the resource pack screen until they accept/decline
+# - After successful acceptance, the player is automatically connected to the first server

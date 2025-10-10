@@ -50,7 +50,7 @@ class Velocitypacker @Inject constructor(
         logger.info("Resource Pack SHA-1: ${if (config.resourcePackSha1.isNotBlank()) config.resourcePackSha1 else "Not set"}")
         logger.info("Kick on decline: ${config.kickOnDecline}")
         logger.info("Kick on failed download: ${config.kickOnFailedDownload}")
-        logger.info("Only on first join: ${config.onlyOnFirstJoin}")
+        logger.info("Pack sent on every proxy join, not on server switches")
     }
 
     @Subscribe

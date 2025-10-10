@@ -9,11 +9,10 @@ import java.io.FileWriter
 data class Config(
     val resourcePackUrl: String = "https://example.com/resourcepack.zip",
     val resourcePackSha1: String = "",
-    val resourcePackPrompt: String = "§aBitte akzeptiere das Resourcepack um zu spielen!",
+    val resourcePackPrompt: String = "§aPlease accept the resource pack to play!",
     val kickOnDecline: Boolean = true,
     val kickOnFailedDownload: Boolean = true,
-    val kickMessage: String = "§cDu musst das Resourcepack akzeptieren um zu spielen!",
-    val onlyOnFirstJoin: Boolean = true
+    val kickMessage: String = "§cYou must accept the resource pack to play!"
 ) {
     companion object {
         private val yaml: Yaml by lazy {
@@ -37,11 +36,10 @@ data class Config(
                     Config(
                         resourcePackUrl = data["resourcePackUrl"] as? String ?: "https://example.com/resourcepack.zip",
                         resourcePackSha1 = data["resourcePackSha1"] as? String ?: "",
-                        resourcePackPrompt = data["resourcePackPrompt"] as? String ?: "§aBitte akzeptiere das Resourcepack um zu spielen!",
+                        resourcePackPrompt = data["resourcePackPrompt"] as? String ?: "§aPlease accept the resource pack to play!",
                         kickOnDecline = data["kickOnDecline"] as? Boolean ?: true,
                         kickOnFailedDownload = data["kickOnFailedDownload"] as? Boolean ?: true,
-                        kickMessage = data["kickMessage"] as? String ?: "§cDu musst das Resourcepack akzeptieren um zu spielen!",
-                        onlyOnFirstJoin = data["onlyOnFirstJoin"] as? Boolean ?: true
+                        kickMessage = data["kickMessage"] as? String ?: "§cYou must accept the resource pack to play!"
                     )
                 }
             } catch (e: Exception) {
@@ -59,8 +57,7 @@ data class Config(
                     "resourcePackPrompt" to config.resourcePackPrompt,
                     "kickOnDecline" to config.kickOnDecline,
                     "kickOnFailedDownload" to config.kickOnFailedDownload,
-                    "kickMessage" to config.kickMessage,
-                    "onlyOnFirstJoin" to config.onlyOnFirstJoin
+                    "kickMessage" to config.kickMessage
                 )
                 yaml.dump(data, writer)
             }

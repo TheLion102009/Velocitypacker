@@ -1,16 +1,19 @@
 package de.thelion.velocitypacker
 
 import com.velocitypowered.api.event.PostOrder
+import com.velocitypowered.api.event.ResultedEvent
 import com.velocitypowered.api.event.Subscribe
+import com.velocitypowered.api.event.connection.DisconnectEvent
 import com.velocitypowered.api.event.connection.PostLoginEvent
 import com.velocitypowered.api.event.player.PlayerResourcePackStatusEvent
-import com.velocitypowered.api.event.player.ServerConnectedEvent
+import com.velocitypowered.api.event.player.ServerPreConnectEvent
 import com.velocitypowered.api.proxy.Player
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
 import org.slf4j.Logger
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit
 
 class ResourcePackListener(
     private val plugin: Velocitypacker,
@@ -18,49 +21,38 @@ class ResourcePackListener(
     private val database: DatabaseManager,
     private val logger: Logger
 ) {
-    // Tracking players who are currently being sent the resource pack
-    private val pendingPlayers = ConcurrentHashMap<UUID, Boolean>()
+    // Tracking players who are waiting for resource pack acceptance
+    private val pendingPlayers = ConcurrentHashMap<UUID, Long>()
     
-    // Tracking first join to proxy (not backend server switch)
-    private val firstJoinToProxy = ConcurrentHashMap<UUID, Boolean>()
+    // Tracking players who have successfully loaded the pack in this session
+    private val acceptedThisSession = ConcurrentHashMap<UUID, Boolean>()
 
     @Subscribe(order = PostOrder.FIRST)
     fun onPostLogin(event: PostLoginEvent) {
         val player = event.player
-        firstJoinToProxy[player.uniqueId] = true
         
-        // Check if player has already accepted the pack
-        if (config.onlyOnFirstJoin && database.hasAccepted(player.uniqueId)) {
-            logger.info("Player ${player.username} has already accepted the resource pack")
-            return
-        }
-
-        // Send resource pack
+        // Always send pack on proxy join (not on server switch)
+        // Mark player as pending and send resource pack
+        pendingPlayers[player.uniqueId] = System.currentTimeMillis()
         sendResourcePack(player)
     }
 
-    @Subscribe
-    fun onServerConnected(event: ServerConnectedEvent) {
+    @Subscribe(order = PostOrder.FIRST)
+    fun onServerPreConnect(event: ServerPreConnectEvent) {
         val player = event.player
         
-        // Skip if this is the first join to proxy (already handled in PostLoginEvent)
-        if (firstJoinToProxy.remove(player.uniqueId) == true) {
+        // Allow connection if player has accepted the pack in this session
+        if (acceptedThisSession.containsKey(player.uniqueId)) {
             return
         }
         
-        // Skip if player has already accepted and onlyOnFirstJoin is enabled
-        if (config.onlyOnFirstJoin && database.hasAccepted(player.uniqueId)) {
+        // Check if player is pending resource pack acceptance
+        if (pendingPlayers.containsKey(player.uniqueId)) {
+            // Block connection until pack is accepted or declined
+            // Player stays in the resource pack screen
+            event.result = ServerPreConnectEvent.ServerResult.denied()
             return
         }
-
-        // Don't send pack again when switching backend servers if already accepted
-        if (database.hasAccepted(player.uniqueId)) {
-            logger.info("Player ${player.username} switching servers - pack already accepted")
-            return
-        }
-
-        // Send resource pack if not yet accepted
-        sendResourcePack(player)
     }
 
     @Subscribe
@@ -78,6 +70,10 @@ class ResourcePackListener(
                 logger.info("Player ${player.username} successfully downloaded the resource pack")
                 database.setAccepted(player.uniqueId, true)
                 pendingPlayers.remove(player.uniqueId)
+                acceptedThisSession[player.uniqueId] = true
+                
+                // Auto-connect player to first available server
+                connectToFirstServer(player)
             }
 
             PlayerResourcePackStatusEvent.Status.DECLINED -> {
@@ -94,7 +90,7 @@ class ResourcePackListener(
                 pendingPlayers.remove(player.uniqueId)
                 
                 if (config.kickOnFailedDownload) {
-                    kickPlayer(player, "§cResourcepack Download fehlgeschlagen!")
+                    kickPlayer(player, "§cResource pack download failed!")
                 }
             }
 
@@ -108,10 +104,29 @@ class ResourcePackListener(
             }
         }
     }
+    
+    private fun connectToFirstServer(player: Player) {
+        // Get the first available server
+        val servers = plugin.server.allServers
+        if (servers.isNotEmpty()) {
+            val firstServer = servers.first()
+            player.createConnectionRequest(firstServer).fireAndForget()
+            logger.info("Connecting ${player.username} to ${firstServer.serverInfo.name}")
+        } else {
+            logger.warn("No servers available to connect ${player.username}")
+        }
+    }
+    
+    @Subscribe
+    fun onDisconnect(event: DisconnectEvent) {
+        val player = event.player
+        // Clean up session data when player disconnects
+        pendingPlayers.remove(player.uniqueId)
+        acceptedThisSession.remove(player.uniqueId)
+        logger.debug("Cleaned up session data for ${player.username}")
+    }
 
     private fun sendResourcePack(player: Player) {
-        pendingPlayers[player.uniqueId] = true
-        
         try {
             val promptComponent = LegacyComponentSerializer.legacySection()
                 .deserialize(config.resourcePackPrompt)
@@ -148,6 +163,6 @@ class ResourcePackListener(
 
     fun cleanup() {
         pendingPlayers.clear()
-        firstJoinToProxy.clear()
+        acceptedThisSession.clear()
     }
 }
