@@ -159,7 +159,3 @@ For questions or problems:
 - Create an issue in the GitHub repository
 - Check the logs for error messages
 - Make sure all dependencies are correctly installed
-
----
-
-**Good luck with your Velocitypacker plugin! 🎮**
